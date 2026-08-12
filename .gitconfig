@@ -1,0 +1,5 @@
+[http "https://github.com"]
+	proxy = http://127.0.0.1:7890
+[user]
+	name = Kylin233333
+	email = kylin62442@outlook.com

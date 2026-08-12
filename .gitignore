@@ -1,0 +1,66 @@
+# ============================================================
+# dotfiles 忽略规则（work-tree = $HOME）
+# 只忽略私有/运行时数据，配置类文件均纳入版本管理
+# ============================================================
+
+# --- 敏感信息 ---
+.env
+.codex/config.toml
+.config/opencode/opencode.jsonc
+
+# --- Shell 历史与会话 ---
+.zsh_history
+.zsh_history.*
+.zsh_sessions/
+*.history
+
+# --- AI 工具运行时数据 ---
+.claude/
+.codex/*
+!.codex/config.toml.template
+.config/opencode/node_modules/
+.config/opencode/package.json
+.config/opencode/package-lock.json
+.continue/
+.copilot/
+.agents/state/
+.playwright-mcp/
+
+# --- 语言/包管理运行时 ---
+.cargo/
+.rustup/
+.npm/
+.gradle/
+.pip/
+.python/
+.mypy_cache/
+__pycache__/
+
+# --- 系统/应用数据 ---
+.Trash/
+.cache/
+.local/
+.homebrew/
+.docker/
+.android/
+.atrust-data/
+.agently-cli/
+.cc-switch/
+.murchi/
+.matplotlib/
+.mpv/
+.vscode/
+.vscode-shared/
+.browser-harness/
+
+# --- 密钥与凭据 ---
+.ssh/
+.gnupg/
+.netrc
+*.pem
+*.key
+
+# --- 临时文件 ---
+*~
+*.swp
+.DS_Store

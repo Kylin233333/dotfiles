@@ -1,0 +1,23 @@
+model = "deepseek-v4-flash"
+model_reasoning_effort = "max"
+model_provider = "deepseek"
+preferred_auth_method = "apikey"
+forced_login_method = "api"
+model_catalog_json = "~/.codex/models.json"
+
+[projects."/Users/kylin"]
+trust_level = "trusted"
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+"gpt-5.6-sol" = 3
+
+[notice.model_migrations]
+"gpt-5.4-mini" = "gpt-5.6-luna"
+
+
+[model_providers.deepseek]
+name = "deepseek"
+base_url = "https://api.deepseek.com/"
+wire_api = "responses"
+experimental_bearer_token = "${DEEPSEEK_API_KEY}"

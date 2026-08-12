@@ -1,0 +1,24 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "snapshot": false,
+  "mcp": {
+    "bark": {
+      "type": "local",
+      "command": ["bark-mcp-server"],
+      "enabled": true,
+      "env": {
+        "BARK_KEY": "${BARK_KEY}"
+      }
+    },
+    "webclaw": {
+      "type": "local",
+      "command": ["/opt/homebrew/bin/webclaw-mcp"],
+      "enabled": true
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp@latest"],
+      "enabled": true
+    }
+  }
+}
