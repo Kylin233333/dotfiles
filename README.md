@@ -1,122 +1,128 @@
-# dotfiles — 我的配置文件集合
+# dotfiles — 我的电脑配置备份
 
-> 一站式管理个人开发环境的全部配置文件，支持多台机器一键部署与同步。
+> 把你的电脑设置「云备份 + 恢复出厂」，换新电脑一条命令还原，配置改坏了一键回滚。
 
 ## 目录
 
-- [项目简介](#项目简介)
-- [技术方案](#技术方案)
+- [这是什么？能做什么？](#这是什么能做什么)
+- [技术方案：裸 git 仓库](#技术方案裸-git-仓库)
 - [目录结构](#目录结构)
 - [快速开始（新机器部署）](#快速开始新机器部署)
 - [日常使用](#日常使用)
-- [敏感信息处理](#敏感信息处理)
-- [支持的环境](#支持的环境)
+- [换新 Mac 后的 Token 配置](#换新-mac-后的-token-配置)
+- [改坏了怎么办（回滚）](#改坏了怎么办回滚)
 - [常见问题](#常见问题)
 - [License](#license)
 
 ---
 
-## 项目简介
+## 这是什么？能做什么？
 
-本仓库托管了作者日常开发环境的全部可迁移配置，涵盖：
+这是作者**全部电脑配置的备份仓库**，托管在 GitHub 上。你电脑上那些「改起来很麻烦、丢了很心疼」的配置文件，都在这里有一份带版本历史的记录：
 
 | 类别 | 内容 |
 |------|------|
-| **Shell** | zsh（zinit 插件管理器 + 自定义提示符 + alias + 代理）、zprofile、zshenv |
-| **Git** | 全局 gitconfig（用户信息、GitHub 代理）、gitignore 规则 |
-| **编辑器** | Neovim（lazy.nvim 插件体系，options/keymaps/plugins/colorscheme/lsp 五模块） |
-| **AI 工具** | opencode（MCP 服务：bark/webclaw/playwright）、codex（DeepSeek 提供商）、claude skills |
-| **系统工具** | btop、htop 监控面板配置，fish shell 基础配置 |
-| **软件清单** | `my-packages.txt` 完整 Homebrew 软件包列表（formula + cask） |
+| **Shell** | zsh 配置（插件、提示符、别名、代理） |
+| **Git** | git 全局配置、忽略规则 |
+| **编辑器** | Neovim 完整配置（插件、快捷键、LSP） |
+| **AI 工具** | opencode、codex（DeepSeek）、Claude 技能 |
+| **系统工具** | btop、htop 监控面板 |
+| **软件清单** | 你装过的所有软件（Homebrew） |
 
-采用 **裸 git 仓库** 方案：`~/.dotfiles` 为 `git init --bare` 仓库，`work-tree` 直接指向 `$HOME`，通过 `dotfiles` alias 管理，**不产生任何符号链接**，配置文件就地版本管理。
+**能做什么：**
 
-## 技术方案
+1. **换电脑 / 重装系统**：一条命令，所有配置和软件自动还原，新电脑 = 旧电脑
+2. **改配置不怕改坏**：每次改动先存一个「存档」，改坏了随时回到上一个存档
+3. **软件搬家**：`my-packages.txt` 记着你装的所有软件，新电脑自动装齐
 
-```
-~/.dotfiles         裸 git 仓库（git init --bare）
-    ↓ work-tree = $HOME
-~/.zshrc ~/.gitconfig ~/.config/...   所有配置文件直接入库
-```
+**简单说：这是你电脑设置的「时光机 + 云同步」。**
 
-核心 alias（已写入 `~/.zshrc`）：
+## 技术方案：裸 git 仓库
+
+### 为什么不用普通 git 仓库？
+
+| | 普通仓库 | 裸仓库（本项目） |
+|---|---|---|
+| 是什么 | 一个「项目文件夹」+ 藏在里面的 .git 记录 | **只有** .git 记录，没有项目文件夹 |
+| 常见用途 | 写代码（比如你的其他项目） | 专门追踪「散落在各处的文件」 |
+| 配置存在哪 | 仓库文件夹内（副本） | **原地不动**（就是真实文件本身） |
+
+**打个比方：**
+
+- **普通仓库** = 一个行李箱。你必须把东西**装进箱子**（复制文件进去），箱子里是副本，改了要手动同步回来。
+- **裸仓库** = 一个**记账本**。它不复制你的配置，而是记录你电脑里真实存在的配置文件（`.zshrc`、`.config/nvim/`...）的内容和每次改动。
+
+你的配置散落在 `~/.zshrc`、`~/.config/nvim/`、`~/.codex/` 等不同位置，裸仓库可以让它们**原地**被管理：`git checkout` 一条命令在新电脑原位还原，不用复制、不用建软链接。
+
+### `~/.dotfiles` 目录里是什么？
+
+它是**这个项目的「档案室」**——里面只有 git 的账本（提交历史、版本记录），**不含你的任何配置文件**。
+
+- `~/.zshrc`、`~/.config/nvim/` 是「被保管的物品」，待在原处不动
+- `~/.dotfiles` 是「保管员的账本」，只记录每个物品的内容和每次改动
+- 账本是整套备份系统的核心
+
+### 核心命令
 
 ```bash
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
 ```
 
-> 为什么不使用 stow / 普通仓库 + 软链接？
-> 裸仓库方案下配置文件就是真实文件本身，无需维护软链接关系，
-> 新机器 `git checkout` 一键还原，且不会因软链接断链导致配置失效。
+这行已经自动写入 `~/.zshrc`，之后的 `dotfiles` 命令就相当于「对账本说话」。
 
 ## 目录结构
 
 ```
 .
-├── .zshrc                     # zsh 主配置：zinit 插件、提示符、alias、PATH、代理
-├── .zprofile                  # 登录 shell 配置
-├── .zshenv                    # 环境变量
+├── .zshrc                     # zsh 主配置：插件、提示符、别名、PATH、代理
+├── .zprofile / .zshenv        # 登录配置、环境变量
 ├── .profile / .tcshrc         # 兼容性配置
 ├── .gitconfig                 # git 全局配置（用户信息、GitHub 代理）
-├── .gitignore                 # dotfiles 仓库忽略规则（排除私有/运行时数据）
-├── .env                       # 【不入库】敏感配置（BARK_KEY、DEEPSEEK_API_KEY）
-├── my-packages.txt            # Homebrew 软件包清单（部署时自动安装）
+├── .gitignore                 # 仓库忽略规则（排除私有/运行时数据）
+├── .env                       # 【不入库】敏感配置（Token 填在这里）
+├── my-packages.txt            # Homebrew 软件包清单（dotbrew 自动维护）
+├── README.md                  # 本文件
 ├── bin/
-│   └── setup.sh               # 一键部署脚本（幂等，可重复执行）
+│   ├── setup.sh               # 一键部署脚本（新机器用）
+│   ├── dotpush                # 保存配置改动并推送（alias: dotpush）
+│   └── dotbrew                # 记录新装软件并推送（alias: dotbrew）
 ├── .config/
-│   ├── nvim/                  # Neovim 配置（lazy.nvim）
-│   │   ├── init.lua
-│   │   ├── lazy-lock.json
-│   │   └── lua/               # options / keymaps / plugins / colorscheme / lsp
-│   ├── opencode/
-│   │   └── opencode.jsonc.template   # opencode 配置模板（BARK_KEY 为占位符）
-│   ├── btop/                  # btop 系统监控配置 + 主题
-│   ├── htop/htoprc            # htop 配置
-│   ├── fish/config.fish       # fish shell 基础配置
-│   └── git/ignore             # git 全局忽略规则
+│   ├── nvim/                  # Neovim 配置（插件、快捷键、LSP）
+│   ├── opencode/              # opencode AI 工具（含 MCP 服务配置模板）
+│   ├── btop/  htop/           # 系统监控面板
+│   ├── fish/  git/            # fish shell、git 忽略规则
+│   └── ...
 ├── .codex/
-│   └── config.toml.template   # codex 配置模板（DeepSeek API key 为占位符）
+│   └── config.toml.template   # codex 配置模板（Token 为占位符）
 └── .agents/
     └── skills/agently-mail/   # Claude 技能：agently-mail（邮件助手）
 ```
 
 ## 快速开始（新机器部署）
 
-### 1. 安装 Homebrew（macOS）
+### 第 1 步：安装 Homebrew（macOS）
 
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2. 一键部署
+### 第 2 步：一键部署
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/Kylin233333/dotfiles/master/bin/setup.sh) https://github.com/Kylin233333/dotfiles.git
 ```
 
-脚本会依次完成：
+脚本会自动完成：
 
-1. **克隆裸仓库** `~/.dotfiles`
+1. **克隆裸仓库** 到 `~/.dotfiles`
 2. **拉取最新配置**
 3. **检出全部配置到 `$HOME`**（与已有文件冲突时自动备份为 `*.bak`）
-4. **写入 `dotfiles` alias** 到 `~/.zshrc`
-5. **生成敏感配置**（需要先创建 `~/.env`，见下文）
-6. **安装 Homebrew 软件包**（读取 `my-packages.txt`，已安装的自动跳过）
+4. **写入 alias**（`dotfiles` / `dotpush` / `dotbrew`）到 `~/.zshrc`
+5. **扫描所有需要填写的 Token**，自动生成/补充 `~/.env`（见下节）
+6. **生成实际配置**（opencode / codex 等）
+7. **安装全部软件**（读取 `my-packages.txt`，已装自动跳过）
 
-### 3. 创建敏感配置 `~/.env`
-
-```bash
-cp ~/.env.example ~/.env   # 或手动创建
-chmod 600 ~/.env
-```
-
-```bash
-# ~/.env 内容示例
-BARK_KEY=你的Bark推送密钥
-DEEPSEEK_API_KEY=你的DeepSeek API Key
-```
-
-### 4. 重新加载 shell
+### 第 3 步：重新加载 shell
 
 ```bash
 source ~/.zshrc
@@ -124,87 +130,113 @@ source ~/.zshrc
 
 ## 日常使用
 
-所有操作通过 `dotfiles` alias 完成（等价于在 `$HOME` 下操作一个普通 git 仓库）：
+只有两个场景需要记：
+
+### 场景 A：改了配置（比如改了 `~/.zshrc`）
 
 ```bash
-dotfiles status                  # 查看改动
-dotfiles add ~/.zshrc            # 跟踪新文件（也支持目录，如 ~/.config/btop）
-dotfiles add -A                  # 暂存所有已跟踪文件的改动
-dotfiles commit -m "更新 zsh 配置"
-dotfiles push                    # 推送
-dotfiles pull --ff-only          # 拉取
-dotfiles log --oneline -10       # 查看历史
-dotfiles checkout -- <文件>      # 丢弃某文件的本地改动
+dotpush
 ```
 
-> 提示：`status.showUntrackedFiles` 已设为 `no`，
-> 因此 `dotfiles status` 不会显示 `$HOME` 下海量的未跟踪文件。
+一条命令完成：暂存改动 → 提交 → 推送到 GitHub。没有改动时会提示「无需提交」。
 
-## 敏感信息处理
+> 安全设计：`dotpush` 只处理**已跟踪的配置文件**，绝不会把你桌面上的照片、文档等个人文件误传上去。
 
-本项目采用 **模板 + 环境变量** 方案保护密钥：
+### 场景 B：新装了软件（`brew install xxx`）
 
-1. **仓库内** 只存放带 `${占位符}` 的模板文件（`opencode.jsonc.template`、`config.toml.template`）
-2. **真实密钥** 存放在 `~/.env`（已被 `.gitignore` 排除，权限 600）
-3. **部署脚本** 读取 `~/.env` 并用 `sed` 将占位符替换为真实值，生成实际配置文件
-4. 生成的配置文件（`opencode.jsonc`、`config.toml`）同样被 `.gitignore` 排除，**永不入库**
-
-```
-~/.env (真实密钥, 600)
-   ↓ setup.sh 替换占位符
-模板文件 ──→ 实际配置文件（不入库）
+```bash
+dotbrew
 ```
 
-### 被排除的敏感路径
+一条命令完成：重新生成软件清单 `my-packages.txt` → 提交 → 推送。软件没变化时会提示「无需提交」。
 
-| 路径 | 原因 |
-|------|------|
-| `~/.ssh/` | SSH 私钥 |
-| `~/.env` | API 密钥 |
-| `~/.codex/config.toml` | DeepSeek API Key（模板见 `config.toml.template`） |
-| `~/.config/opencode/opencode.jsonc` | Bark 推送密钥（模板见 `opencode.jsonc.template`） |
-| `~/.claude/` | 会话数据、项目历史 |
-| `~/.zsh_history`、`~/.zsh_sessions/` | 命令历史（可能含敏感命令） |
-| `~/.gradle/`、`~/.cargo/`、`~/.rustup/`、`~/.npm/` 等 | 运行时缓存/凭证 |
-| `~/.Trash/`、`~/.cache/`、`~/.local/` | 系统临时数据 |
+### 高级操作（可选）
 
-## 支持的环境
+```bash
+dotfiles status                  # 查看改了哪些配置
+dotfiles log --oneline -10       # 查看最近 10 次存档记录
+dotfiles checkout -- ~/.zshrc    # 丢弃 .zshrc 的本地改动
+dotfiles pull --ff-only          # 手动拉取其他机器的改动
+```
 
-- **macOS**：完整支持（Homebrew、zsh、Neovim、opencode、codex）
-- **Linux (Arch 等)**：zsh / git / nvim 配置通用；`my-packages.txt` 为 Homebrew 格式，Arch 用户可参考 `bin/setup.sh` 逻辑自行适配 pacman
+## 换新 Mac 后的 Token 配置
+
+**Token（密钥）永远不会出现在 GitHub 仓库里**——仓库是公开网页，放上去等于把密码贴在公告栏。所以每次换新机器，Token 需要在新机器上手动填一次，流程如下：
+
+### 1. 部署脚本会自动创建 `~/.env`
+
+运行部署脚本后，它会在 `~/.env` 中自动写入所有需要填写的条目，每条都带注释说明**来自哪个配置文件**：
+
+```bash
+# 例如自动生成的 ~/.env（Token 留空，等待你填写）
+BARK_KEY=                       # 来自 .config/opencode/opencode.jsonc.template
+DEEPSEEK_API_KEY=               # 来自 .codex/config.toml.template
+GITHUB_TOKEN=                   # 来自 .agents/skills/agently-mail/SKILL.md
+```
+
+> 之后若在配置里新增了其他占位符（形如 花括号-变量名，如 `SOME_NEW_KEY`），重新运行一次 `setup.sh`，新条目会自动追加到 `~/.env`。
+
+### 2. 手动填入真实值
+
+用编辑器打开 `~/.env`，把每个 Token 填进去，保存：
+
+```bash
+vim ~/.env   # 或任何编辑器
+```
+
+### 3. 重新运行部署脚本生成实际配置
+
+```bash
+bash ~/bin/setup.sh
+```
+
+脚本读取 `~/.env`，把配置模板中的占位符替换为真实 Token，生成实际配置文件（这些生成的文件同样不会入库）。
+
+> Token 从哪来？
+> - **BARK_KEY**：Bark App（iOS 推送）设置页
+> - **DEEPSEEK_API_KEY**：platform.deepseek.com → API Keys
+> - **GITHUB_TOKEN**：GitHub → Settings → Developer settings → Personal access tokens
+
+## 改坏了怎么办（回滚）
+
+每次 `dotpush` 都是一次「存档」，改坏了随时回退：
+
+```bash
+dotfiles log --oneline          # 先看有哪些存档（提交记录）
+dotfiles checkout -- <文件>     # 把单个文件恢复到上次存档
+# 或整体回退到某次存档：
+dotfiles reset --hard <存档号>
+```
 
 ## 常见问题
 
-### Q1: 检出时报 "error: The following untracked working tree files would be overwritten by checkout"
+### Q1: 部署时报 "untracked working tree files would be overwritten"
 
-新机器上已有同名文件（如出厂自带的 `.zshrc`）。脚本会自动备份冲突文件为 `*.bak`；
-若手动检出遇到此问题，可执行：
+新机器上已有同名文件（如出厂自带的 `.zshrc`），脚本会自动备份为 `*.bak`。手动处理：
 
 ```bash
 mv ~/.zshrc ~/.zshrc.bak
 dotfiles checkout
 ```
 
-### Q2: 换了机器/新装的配置如何生效？
-
-重新执行部署脚本即可，幂等设计可重复运行：
+### Q2: 换了新机器，配置和软件如何全部还原？
 
 ```bash
+# 1. 安装 Homebrew（见快速开始）
+# 2. 部署（自动装全部软件 + 还原配置）
+bash <(curl -fsSL .../bin/setup.sh) https://github.com/Kylin233333/dotfiles.git
+# 3. 填写 ~/.env 的 Token，再跑一次 setup.sh
 bash ~/bin/setup.sh
 ```
 
-### Q3: 想在另一台机器上修改配置并同步？
+### Q3: opencode / codex 无法启动？
 
-```bash
-dotfiles pull --ff-only   # 先同步
-# ... 修改配置 ...
-dotfiles commit -m "说明" && dotfiles push
-```
+多半是 `~/.env` 里的 Token 没填或填错。填好后重新运行 `bash ~/bin/setup.sh`。
 
-### Q4: 部署后 opencode / codex 无法启动？
+### Q4: `dotpush` 和 `dotfiles add` 什么区别？
 
-检查 `~/.env` 是否存在且包含正确的 `BARK_KEY` / `DEEPSEEK_API_KEY`，
-然后重新运行 `bash ~/bin/setup.sh` 重新生成配置。
+- `dotpush`：**一键保存改动**，适合日常（只处理已跟踪文件）
+- `dotfiles add <文件>`：**把新文件纳入管理**，适合首次加入一个新配置文件（如 `dotfiles add ~/.config/mpv/`）
 
 ## License
 

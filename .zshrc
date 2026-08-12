@@ -78,3 +78,7 @@ export all_proxy=http://127.0.0.1:7892
 
 # dotfiles 裸仓库管理（~/.dotfiles，work-tree=$HOME）
 alias dotfiles='/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME'
+
+# 一键同步：dotpush=保存配置改动，dotbrew=记录新装软件
+alias dotpush='$HOME/bin/dotpush'
+alias dotbrew='$HOME/bin/dotbrew'
