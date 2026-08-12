@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# ============================================================
+# dotbrew — 记录当前安装的 Homebrew 软件并同步到仓库
+# 用法: dotbrew
+# 说明: 新装了软件后运行一次，自动更新 my-packages.txt
+#       并提交推送；软件清单无变化则跳过
+# ============================================================
+set -euo pipefail
+
+DOT="git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
+LIST="$HOME/my-packages.txt"
+
+echo "==> 生成软件清单"
+{
+    echo "# ============================================================"
+    echo "# Homebrew 软件包清单（dotbrew 自动生成，请勿手改）"
+    echo "# 格式: formula 直接写包名; cask 写作 cask:<包名>"
+    echo "# ============================================================"
+    echo
+    echo "# --- formulas (brew install) ---"
+    brew list --formula | sort
+    echo
+    echo "# --- casks (brew install --cask) ---"
+    brew list --cask | sort | sed 's/^/cask:/'
+} > "$LIST"
+
+$DOT add "$LIST"
+
+if $DOT diff --cached --quiet; then
+    echo "    软件清单没有变化，无需提交"
+    exit 0
+fi
+
+echo "==> 提交并推送"
+$DOT commit -m "brew: 更新软件包清单 $(date '+%Y-%m-%d %H:%M')"
+$DOT push
+
+echo ""
+echo "✅ 软件清单已同步到 GitHub"

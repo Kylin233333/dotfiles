@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# ============================================================
+# dotpush — 一键保存并推送所有配置改动
+# 用法: dotpush
+# 说明: 只处理已跟踪的配置文件（git add -u），不会误提交
+#       $HOME 下的个人文件（照片、文档等）
+# ============================================================
+set -euo pipefail
+
+DOT="git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
+
+echo "==> 暂存已跟踪配置的改动"
+$DOT add -u
+
+if $DOT diff --cached --quiet; then
+    echo "    没有检测到改动，无需提交"
+    exit 0
+fi
+
+echo "==> 查看即将提交的内容:"
+$DOT status --short
+
+echo "==> 提交并推送"
+$DOT commit -m "update: $(date '+%Y-%m-%d %H:%M')"
+$DOT push
+
+echo ""
+echo "✅ 配置已同步到 GitHub"
