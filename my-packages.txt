@@ -135,7 +135,6 @@ zimg
 zstd
 
 # --- casks (brew install --cask) ---
-cask:clash-party
 cask:codex
 cask:gdisk
 cask:ghostty
